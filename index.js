@@ -44,12 +44,27 @@ app.post("/api/notes", (req, res) => {
   const note = {
     id: generateId(),
     content: body.content,
-    important: body.important || Math.random() > 0.5,
+    important: body.important || false,
     date: Date.now(),
   };
 
   notes = [...notes, note];
   res.json(note);
+});
+
+app.put("/api/notes/:id", (req, res) => {
+  const id = Number(req.params.id);
+  const noteIndex = notes.findIndex((note) => note.id === id);
+  if (noteIndex !== -1) {
+    const updateNote = { ...notes[noteIndex], ...req.body };
+    notes[noteIndex] = updateNote;
+    res.json(updateNote);
+  } else {
+    res.status(404).json({ error: "Note not found" });
+  }
+});
+app.use((req, res) => {
+  res.status(404).json({ error: "Not found" });
 });
 
 const PORT = process.env.PORT;
