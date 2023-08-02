@@ -2,9 +2,12 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const app = express();
+
+let notes = require("./db");
 app.use(express.json());
 app.use(cors());
-let notes = require("./db");
+
+
 
 app.get("/", (req, res) => {
   res.send("<h1>Hola Mundo</h1>");

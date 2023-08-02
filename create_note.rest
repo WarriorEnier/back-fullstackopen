@@ -16,7 +16,8 @@ DELETE http://localhost:3001/api/notes/7 HTTP/1.1
 ###
 
 PUT http://localhost:3001/api/notes/7 HTTP/1.1
+Content-Type: application/json
 
 {
-    "important": false
+    "important": true
 }
