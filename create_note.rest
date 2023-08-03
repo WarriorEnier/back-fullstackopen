@@ -2,20 +2,30 @@ GET http://localhost:3001/api/notes
 
 ###
 
+GET http://localhost:3001/api/notes/64cbb88e103d1ec91a944478 HTTP/1.1
+Content-Type: application/json
+
+###Inconrrect Request
+
+GET http://localhost:3001/api/notes/111tuqui HTTP/1.1
+Content-Type: application/json
+
+###
+
 POST http://localhost:3001/api/notes/ HTTP/1.1
 Content-Type: application/json
 
 {
-    "content":"Esto es un texto de prueba"
+    "contet":"Esto es un texto de prueba"
 }
 
 ###
 
-DELETE http://localhost:3001/api/notes/7 HTTP/1.1
+DELETE http://localhost:3001/api/notes/64ca774420634b6da54fd332 HTTP/1.1
 
 ###
 
-PUT http://localhost:3001/api/notes/7 HTTP/1.1
+PUT http://localhost:3001/api/notes/64cbb88e103d1ec91a944479 HTTP/1.1
 Content-Type: application/json
 
 {

@@ -1,41 +1,51 @@
+require("./connection");
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const app = express();
+const Note = require("./models/Note");
 
 let notes = require("./db");
+const notFound = require("./middleware/notFound");
+const handleErrors = require("./middleware/handleErrors");
 app.use(express.json());
 app.use(cors());
-
-
 
 app.get("/", (req, res) => {
   res.send("<h1>Hola Mundo</h1>");
 });
 
 app.get("/api/notes", (req, res) => {
-  res.json(notes);
+  Note.find({}).then((notes) => res.json(notes));
 });
 
-app.get("/api/notes/:id", (req, res) => {
-  const id = Number(req.params.id);
-  const note = notes.find((note) => note.id === id);
-  note ? res.json(note) : res.status(400).end();
+app.get("/api/notes/:id", (req, res, next) => {
+  const id = req.params.id;
+  Note.findById(id)
+    .then((note) =>
+      note
+        ? res.json(note)
+        : res.status(404).json({ error: "Note not found" }).end()
+    )
+    .catch((err) => {
+      next(err);
+    });
 });
 
-app.delete("/api/notes/:id", (req, res) => {
-  const id = Number(req.params.id);
-  console.log(typeof id);
-  notes = notes.filter((note) => note.id !== id);
-  res.status(204).end();
+app.delete("/api/notes/:id", (req, res, next) => {
+  const id = req.params.id;
+  Note.findOneAndDelete({ _id: id })
+    .then((note) =>
+      note
+        ? res.status(204).json(note).end()
+        : res.status(404).json({ error: "Note not found" }).end()
+    )
+    .catch((err) => {
+      next(err);
+    });
 });
 
-const generateId = () => {
-  const maxId = notes.length > 0 ? Math.max(...notes.map((n) => n.id)) : 0;
-  return maxId + 1;
-};
-
-app.post("/api/notes", (req, res) => {
+app.post("/api/notes", (req, res, next) => {
   const body = req.body;
 
   if (!body.content) {
@@ -44,31 +54,34 @@ app.post("/api/notes", (req, res) => {
     });
   }
 
-  const note = {
-    id: generateId(),
+  const note = new Note({
     content: body.content,
     important: body.important || false,
     date: Date.now(),
-  };
-
-  notes = [...notes, note];
-  res.json(note);
+  });
+  note
+    .save()
+    .then((saveNote) => res.json(saveNote))
+    .catch((err) => {
+      next(err);
+    });
 });
 
-app.put("/api/notes/:id", (req, res) => {
-  const id = Number(req.params.id);
-  const noteIndex = notes.findIndex((note) => note.id === id);
-  if (noteIndex !== -1) {
-    const updateNote = { ...notes[noteIndex], ...req.body };
-    notes[noteIndex] = updateNote;
-    res.json(updateNote);
-  } else {
-    res.status(404).json({ error: "Note not found" });
-  }
+app.put("/api/notes/:id", (req, res, next) => {
+  const id = req.params.id;
+  Note.findByIdAndUpdate(id, req.body, { new: true })
+    .then((note) =>
+      note
+        ? res.json(note)
+        : res.status(404).json({ error: "Note not found" }).end()
+    )
+    .catch((err) => {
+      next(err);
+    });
 });
-app.use((req, res) => {
-  res.status(404).json({ error: "Not found" });
-});
+
+app.use(notFound);
+app.use(handleErrors);
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
