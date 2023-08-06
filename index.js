@@ -1,5 +1,5 @@
-require("./connection");
 require("dotenv").config();
+require("./connection");
 const express = require("express");
 const cors = require("cors");
 const app = express();
